@@ -1,0 +1,19 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Bash(npm run test*)",
+      "Bash(npm run typen*)",
+      "Bash(npm run build*)",
+      "Bash(npx vitest *)",
+      "Bash(cargo test *)",
+      "Bash(git status*)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
+      "Bash(nu scripts/konflikt-check.nu*)",
+      "Bash(herdr agent list*)",
+      "Bash(herdr agent read *)"
+    ]
+  }
+}
