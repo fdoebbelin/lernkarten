@@ -82,6 +82,22 @@ describe("csvZuKarten", () => {
     expect(fehler[0].meldung).toContain("Antwort");
   });
 
+  it("zählt einen Zeilenumbruch im Feld bei der gemeldeten zeile mit", () => {
+    const text = 'frage;antwort;fach;faelligAm\n"a\nb";x;1;2026-01-01\nF;;1;2026-01-01';
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toHaveLength(1);
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(4);
+  });
+
+  it("zählt einen Zeilenumbruch im Feld mit, auch CRLF", () => {
+    const text = 'frage;antwort;fach;faelligAm\r\n"a\r\nb";x;1;2026-01-01\r\nF;;1;2026-01-01';
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toHaveLength(1);
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(4);
+  });
+
   it("meldet eine Zeile ohne Frage als Fehler", () => {
     const text = "frage;antwort;fach;faelligAm\n;Nur Antwort;1;2026-11-12";
     const { karten, fehler } = csvZuKarten(text, "2026-11-12");

@@ -79,6 +79,16 @@ function leseDatensaetze(text: string): Datensatz[] {
         }
       } else {
         feldText += zeichen;
+        if (zeichen === "\n") {
+          zeile++;
+        } else if (zeichen === "\r") {
+          // CR mit nachfolgendem LF ist ein einziger Umbruch; das Feld behält beide Zeichen.
+          if (text[i + 1] === "\n") {
+            feldText += "\n";
+            i++;
+          }
+          zeile++;
+        }
       }
     } else if (zeichen === '"' && feldText === "") {
       inAnfuehrung = true;
