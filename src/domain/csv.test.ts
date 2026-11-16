@@ -98,6 +98,24 @@ describe("csvZuKarten", () => {
     expect(fehler[0].zeile).toBe(4);
   });
 
+  it("meldet eine falsche Kopfzeile als einzigen Fehler und liefert keine Karten", () => {
+    const text = "frage;antwort;fach;faellig\nF1;A1;1;2026-01-01\nF2;A2;2;2026-01-02";
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toEqual([]);
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(1);
+    expect(fehler[0].meldung).toContain("frage;antwort;fach;faelligAm");
+  });
+
+  it("liest eine Datei mit führendem Byte-Order-Mark", () => {
+    const text =
+      String.fromCharCode(0xfeff) + "frage;antwort;fach;faelligAm\nF;A;1;2026-01-01";
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(fehler).toEqual([]);
+    expect(karten).toHaveLength(1);
+    expect(karten[0].frage).toBe("F");
+  });
+
   it("überspringt eine Leerzeile mitten in der Datei ohne Fehler und zählt weiter", () => {
     const text =
       "frage;antwort;fach;faelligAm\nF1;A1;1;2026-01-01\n\nF;;1;2026-01-01";

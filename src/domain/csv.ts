@@ -8,6 +8,7 @@ const KOPFZEILE = `frage${TRENNER}antwort${TRENNER}fach${TRENNER}faelligAm`;
 const FACH_MIN = 1;
 const FACH_MAX = 5;
 const DATUM_MUSTER = /^\d{4}-\d{2}-\d{2}$/;
+const BOM = String.fromCharCode(0xfeff);
 
 export interface CsvFehler {
   /** Zeile in der Datei; die Kopfzeile zählt als Zeile 1. */
@@ -135,9 +136,18 @@ function istIsoDatum(datum: string): boolean {
 export function csvZuKarten(text: string, heute: string): CsvErgebnis {
   const karten: Karte[] = [];
   const fehler: CsvFehler[] = [];
-  const datensaetze = leseDatensaetze(text);
+  const textOhneBom = text.startsWith(BOM) ? text.slice(1) : text;
+  const datensaetze = leseDatensaetze(textOhneBom);
 
-  // Der erste Datensatz ist die Kopfzeile.
+  // Der erste Datensatz muss die Kopfzeile sein; sonst ginge die erste Karte verloren.
+  const erste = datensaetze[0];
+  if (erste !== undefined && erste.felder.join(TRENNER) !== KOPFZEILE) {
+    fehler.push({
+      zeile: 1,
+      meldung: `Zeile 1: Die Kopfzeile muss "${KOPFZEILE}" lauten.`,
+    });
+    return { karten, fehler };
+  }
   for (const datensatz of datensaetze.slice(1)) {
     // Völlig leere Zeilen ohne Trennzeichen überspringen; die Zeilenzählung bleibt unverändert.
     if (datensatz.felder.length === 1 && datensatz.felder[0] === "") {
