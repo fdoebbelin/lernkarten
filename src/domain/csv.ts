@@ -7,6 +7,7 @@ const TRENNER = ";";
 const KOPFZEILE = `frage${TRENNER}antwort${TRENNER}fach${TRENNER}faelligAm`;
 const FACH_MIN = 1;
 const FACH_MAX = 5;
+const DATUM_MUSTER = /^\d{4}-\d{2}-\d{2}$/;
 
 export interface CsvFehler {
   /** Zeile in der Datei; die Kopfzeile zählt als Zeile 1. */
@@ -113,6 +114,23 @@ function leseDatensaetze(text: string): Datensatz[] {
   return datensaetze;
 }
 
+/** Prüft, ob der Wert ein gültiges ISO-Datum JJJJ-MM-TT ist, auch bei Kalendertagen wie 2026-02-30. */
+function istIsoDatum(datum: string): boolean {
+  if (!DATUM_MUSTER.test(datum)) {
+    return false;
+  }
+  const teile = datum.split("-");
+  const jahr = Number(teile[0]);
+  const monat = Number(teile[1]);
+  const tag = Number(teile[2]);
+  if (monat < 1 || monat > 12 || tag < 1) {
+    return false;
+  }
+  // Tag 0 des Folgemonats ist der letzte Tag des Monats.
+  const letzteTag = new Date(Date.UTC(jahr, monat, 0)).getUTCDate();
+  return tag <= letzteTag;
+}
+
 /** Liest CSV-Text in Karten; beschädigte Zeilen stehen in fehler, die übrigen werden übernommen. */
 export function csvZuKarten(text: string, heute: string): CsvErgebnis {
   const karten: Karte[] = [];
@@ -147,12 +165,23 @@ export function csvZuKarten(text: string, heute: string): CsvErgebnis {
       }
     }
 
+    let faelligGewaehlt = faelligAm;
+    if (faelligGewaehlt === "") {
+      faelligGewaehlt = heute;
+    } else if (!istIsoDatum(faelligGewaehlt)) {
+      fehler.push({
+        zeile,
+        meldung: `Zeile ${zeile}: Das Datum "${faelligGewaehlt}" ist kein gültiges Datum JJJJ-MM-TT.`,
+      });
+      continue;
+    }
+
     karten.push({
       id: crypto.randomUUID(),
       frage,
       antwort,
       fach,
-      faelligAm: faelligAm === "" ? heute : faelligAm,
+      faelligAm: faelligGewaehlt,
     });
   }
   return { karten, fehler };

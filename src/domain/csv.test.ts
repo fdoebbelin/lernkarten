@@ -98,6 +98,23 @@ describe("csvZuKarten", () => {
     expect(fehler[0].zeile).toBe(4);
   });
 
+  it("meldet ein faelligAm, das kein ISO-Datum ist, als Fehler", () => {
+    const text = "frage;antwort;fach;faelligAm\nF;A;1;kaputt";
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toEqual([]);
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(2);
+    expect(fehler[0].meldung).toContain("Datum");
+  });
+
+  it("meldet ein faelligAm mit unzulässigem Kalendertag als Fehler", () => {
+    const text = "frage;antwort;fach;faelligAm\nF;A;1;2026-02-30";
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toEqual([]);
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(2);
+  });
+
   it("meldet eine Zeile ohne Frage als Fehler", () => {
     const text = "frage;antwort;fach;faelligAm\n;Nur Antwort;1;2026-11-12";
     const { karten, fehler } = csvZuKarten(text, "2026-11-12");
