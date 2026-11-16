@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { ref } from "vue";
 import StapelListe from "./ansichten/StapelListe.vue";
-import { beispielBestand } from "./domain/beispiel";
 import { heuteIso } from "./domain/leitner";
-import type { Datenbestand } from "./domain/typen";
+import { useBestand } from "./speicher/bestand";
 
 const heute = heuteIso();
-// Startzustand: Beispieldaten im Speicher. Aufgabe C1 ersetzt das durch den gespeicherten Bestand.
-const bestand = ref<Datenbestand>(beispielBestand(heute));
+const { bestand, zustand, fehlermeldung } = useBestand({ heute });
 </script>
 
 <template>
   <main class="seite">
     <h1>Lernkarten</h1>
-    <StapelListe :stapel="bestand.stapel" :heute="heute" />
+    <p v-if="zustand === 'laden'">Lade Lernkarten …</p>
+    <p v-else-if="zustand === 'fehler'" role="alert">{{ fehlermeldung }}</p>
+    <StapelListe v-else-if="bestand" :stapel="bestand.stapel" :heute="heute" />
   </main>
 </template>
