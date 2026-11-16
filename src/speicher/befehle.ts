@@ -1,5 +1,5 @@
 // Dünne Schicht über den Tauri-Befehlen aus src-tauri/src/lib.rs.
-// Noch nicht an die Oberfläche angebunden: das ist Aufgabe C1 im Arbeitsblatt.
+// Die Oberfläche greift über useBestand() in bestand.ts darauf zu.
 
 import { invoke } from "@tauri-apps/api/core";
 import type { Datenbestand } from "../domain/typen";
