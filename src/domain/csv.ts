@@ -44,6 +44,8 @@ export function kartenZuCsv(karten: Karte[]): string {
 interface Datensatz {
   felder: string[];
   startZeile: number;
+  /** true, wenn ein geöffnetes Anführungszeichen im Feld am Dateiende nicht geschlossen wurde. */
+  nichtGeschlossen: boolean;
 }
 
 /**
@@ -64,7 +66,7 @@ function leseDatensaetze(text: string): Datensatz[] {
   };
   const beendeDatensatz = () => {
     beendeFeld();
-    datensaetze.push({ felder, startZeile });
+    datensaetze.push({ felder, startZeile, nichtGeschlossen: false });
     felder = [];
     startZeile = zeile + 1;
   };
@@ -109,7 +111,11 @@ function leseDatensaetze(text: string): Datensatz[] {
       feldText += zeichen;
     }
   }
-  if (feldText !== "" || felder.length > 0) {
+  if (inAnfuehrung) {
+    beendeFeld();
+    datensaetze.push({ felder, startZeile, nichtGeschlossen: true });
+    felder = [];
+  } else if (feldText !== "" || felder.length > 0) {
     beendeDatensatz();
   }
   return datensaetze;
@@ -149,6 +155,14 @@ export function csvZuKarten(text: string, heute: string): CsvErgebnis {
     return { karten, fehler };
   }
   for (const datensatz of datensaetze.slice(1)) {
+    // Ein nicht geschlossenes Anführungszeichen verschluckt den Rest der Datei; dieser Datensatz wird nicht übernommen.
+    if (datensatz.nichtGeschlossen) {
+      fehler.push({
+        zeile: datensatz.startZeile,
+        meldung: `Zeile ${datensatz.startZeile}: Ein Anführungszeichen wird nicht geschlossen.`,
+      });
+      continue;
+    }
     // Völlig leere Zeilen ohne Trennzeichen überspringen; die Zeilenzählung bleibt unverändert.
     if (datensatz.felder.length === 1 && datensatz.felder[0] === "") {
       continue;

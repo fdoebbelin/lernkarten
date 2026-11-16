@@ -98,6 +98,27 @@ describe("csvZuKarten", () => {
     expect(fehler[0].zeile).toBe(4);
   });
 
+  it("meldet einen Datensatz mit nicht geschlossenem Anführungszeichen als Fehler und übernimmt ihn nicht", () => {
+    const text =
+      'frage;antwort;fach;faelligAm\nA;B;1;2026-01-01\n"offen;X;1;2026-01-01\nC;D;2;2026-01-02';
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toHaveLength(1);
+    expect(karten[0].frage).toBe("A");
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(3);
+    expect(fehler[0].meldung).toContain("Anführungszeichen");
+  });
+
+  it("meldet einen unvollständigen Datensatz am Dateiende ohne Zeilenumbruch als Fehler", () => {
+    const text = 'frage;antwort;fach;faelligAm\nA;B;1;2026-01-01\n"offen;X';
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toHaveLength(1);
+    expect(karten[0].frage).toBe("A");
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(3);
+    expect(fehler[0].meldung).toContain("Anführungszeichen");
+  });
+
   it("meldet eine falsche Kopfzeile als einzigen Fehler und liefert keine Karten", () => {
     const text = "frage;antwort;fach;faellig\nF1;A1;1;2026-01-01\nF2;A2;2;2026-01-02";
     const { karten, fehler } = csvZuKarten(text, "2026-01-01");
