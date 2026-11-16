@@ -47,8 +47,8 @@ def main [] {
     (zeile "Rust (rustc)" "ab 1.90" true $rustc ($rustc != null and (mindestens $rustc 1 90)))
     (zeile "Cargo" "mit Rust" true $cargo ($cargo != null))
     (zeile "Claude Code" "aktuell" true $claude ($claude != null))
-    (zeile "opencode" "ab 1.18.29 für herdr" true $opencode ($opencode != null))
-    (zeile "herdr" "ab 0.9" true (if $herdr_da { {text: "vorhanden", a: 0, b: 0} } else { null }) $herdr_da)
+    (zeile "opencode" "ab 1.18.29 für herdr, nicht geprüft" true $opencode ($opencode != null))
+    (zeile "herdr" "ab 0.9, nicht geprüft" true (if $herdr_da { {text: "vorhanden", a: 0, b: 0} } else { null }) $herdr_da)
     (zeile "lazygit" "beliebig" false (if $lazygit_da { {text: "vorhanden", a: 0, b: 0} } else { null }) $lazygit_da)
     (zeile "Meld" "beliebig" false (if $meld_da { {text: "vorhanden", a: 0, b: 0} } else { null }) $meld_da)
   ]
