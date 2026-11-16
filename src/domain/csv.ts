@@ -139,6 +139,10 @@ export function csvZuKarten(text: string, heute: string): CsvErgebnis {
 
   // Der erste Datensatz ist die Kopfzeile.
   for (const datensatz of datensaetze.slice(1)) {
+    // Völlig leere Zeilen ohne Trennzeichen überspringen; die Zeilenzählung bleibt unverändert.
+    if (datensatz.felder.length === 1 && datensatz.felder[0] === "") {
+      continue;
+    }
     const zeile = datensatz.startZeile;
     const frage = datensatz.felder[0] ?? "";
     const antwort = datensatz.felder[1] ?? "";

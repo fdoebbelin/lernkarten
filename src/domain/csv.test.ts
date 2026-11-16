@@ -98,6 +98,17 @@ describe("csvZuKarten", () => {
     expect(fehler[0].zeile).toBe(4);
   });
 
+  it("überspringt eine Leerzeile mitten in der Datei ohne Fehler und zählt weiter", () => {
+    const text =
+      "frage;antwort;fach;faelligAm\nF1;A1;1;2026-01-01\n\nF;;1;2026-01-01";
+    const { karten, fehler } = csvZuKarten(text, "2026-01-01");
+    expect(karten).toHaveLength(1);
+    expect(karten[0].frage).toBe("F1");
+    expect(fehler).toHaveLength(1);
+    expect(fehler[0].zeile).toBe(4);
+    expect(fehler[0].meldung).toContain("Antwort");
+  });
+
   it("meldet ein faelligAm, das kein ISO-Datum ist, als Fehler", () => {
     const text = "frage;antwort;fach;faelligAm\nF;A;1;kaputt";
     const { karten, fehler } = csvZuKarten(text, "2026-01-01");
