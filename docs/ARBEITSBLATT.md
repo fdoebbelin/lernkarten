@@ -49,7 +49,7 @@ Die Namen vergeben Sie mit `herdr agent rename`. Über sie schicken sich die Age
 | Wiederholungsintervalle | Fach 1: 1 Tag, Fach 2: 2 Tage, Fach 3: 5 Tage, Fach 4: 10 Tage, Fach 5: 30 Tage |
 | Bewertung | gewusst: ein Fach weiter (höchstens Fach 5); nicht gewusst: zurück in Fach 1 |
 | Datendatei | `lernkarten.json`, Formatversion 1 |
-| Ort der Datendatei unter Windows | `%APPDATA%\de.metarow.lernkarten\lernkarten.json` |
+| Ort der Datendatei unter Windows | `de.metarow.lernkarten\lernkarten.json` unter `APPDATA`; in PowerShell `$env:APPDATA`, in Nushell `$env.APPDATA` |
 | Ort der Datendatei unter Linux | `~/.local/share/de.metarow.lernkarten/lernkarten.json` |
 | Datumsformat | ISO `JJJJ-MM-TT` |
 | Integrationsbranch | `main` |
@@ -154,7 +154,36 @@ Quellen: [Claude Code im Pro-Plan](https://support.claude.com/en/articles/111458
 
 ### 3.2 herdr
 
-1. Die Beispielkonfiguration übernehmen: `herdr/config.beispiel.toml` nach `~/.config/herdr/config.toml`, unter Windows nach `%APPDATA%\herdr\config.toml`. Ist dort schon eine Datei, die Abschnitte zusammenführen.
+1. Die Beispielkonfiguration übernehmen: `herdr/config.beispiel.toml` als `config.toml` in den Konfigurationsordner von herdr kopieren, im Projektordner:
+
+   Linux, Nushell:
+
+   ```nu
+   mkdir ~/.config/herdr
+   cp --no-clobber herdr/config.beispiel.toml ~/.config/herdr/config.toml
+   ```
+
+   Windows, Nushell:
+
+   ```nu
+   mkdir ($env.APPDATA | path join herdr)
+   cp --no-clobber herdr/config.beispiel.toml ($env.APPDATA | path join herdr config.toml)
+   ```
+
+   Windows, PowerShell:
+
+   ```powershell
+   New-Item -ItemType Directory -Force "$env:APPDATA\herdr"
+   if (-not (Test-Path "$env:APPDATA\herdr\config.toml")) { Copy-Item herdr\config.beispiel.toml "$env:APPDATA\herdr\config.toml" }
+   ```
+
+   Eine vorhandene `config.toml` bleibt dabei unverändert. Dann die Abschnitte aus der Beispielkonfiguration von Hand übernehmen; Schritt 4 zeigt, ob die eigenen Einträge wirken.
+
+   > [!warning] Keine cmd-Schreibweise
+   > `%APPDATA%` gilt nur in `cmd.exe`. PowerShell und Nushell lesen es als Ordnernamen und melden einen Pfad wie `C:\Users\…\%APPDATA%\herdr`. In PowerShell heißt die Variable `$env:APPDATA`, in Nushell `$env.APPDATA`.
+
+   > [!note] Ort unter Windows
+   > Beobachtet am 17.11.2026 unter Windows mit herdr 0.9.5: Die Konfiguration liegt in `$env:APPDATA\herdr\config.toml`, die Laufzeitdaten wie Worktrees unter `~\.herdr`; einen Ordner `~\.config\herdr` gibt es dort nicht. Nicht aus der herdr-Dokumentation geprüft. Ob herdr die Datei liest, zeigt Schritt 4.
 2. Neu laden:
 
    ```nu
