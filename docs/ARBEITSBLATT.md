@@ -252,6 +252,9 @@ Vor jeder Probe und jeder Vorführung.
 
    Danach in Claude Code `/effort high`.
 
+   > [!tip] Alternative: eigener Tab
+   > Statt das Fenster zu teilen, genügt ein neuer Tab im Workspace `lernkarten`: In der Seitenleiste `lernkarten` wählen, dann `+` neben der Tab-Nummer oder `ctrl+b`, `c`. Weil die Beispielkonfiguration `new_cwd = "follow"` setzt, übernimmt der Tab das Verzeichnis des zuletzt aktiven Panes; vor `claude` deshalb mit `pwd` prüfen, dass es `…/Projects/lernkarten` ohne `.worktrees` ist. Der Leitstand muss im Haupt-Checkout auf `main` laufen. Für das Publikum ist das geteilte Fenster anschaulicher, weil Shell und Leitstand gleichzeitig zu sehen sind; im Tab wechseln Sie mit `ctrl+b`, `n` und `p`. Schritt 6 gilt unverändert, die Shell steht dann im ersten Tab.
+
 6. Den Agenten benennen. In der Shell links:
 
    ```nu
