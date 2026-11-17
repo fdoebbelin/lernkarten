@@ -1157,3 +1157,4 @@ Fehler bei Installation und Einrichtung stehen in [[INSTALLATION]], Abschnitt 13
 | `runde.nu starten` meldet „Tag … fehlt“ | Keine Probe markiert oder Tags nicht auf GitHub | Abschnitt 9.1: markieren und Tags pushen |
 | `runde.nu markieren` meldet „nicht gefunden“ | Runde in der Probe nicht zusammengeführt oder ohne `--no-ff` | Merges mit `git log --first-parent --merges --oneline main` prüfen, Tag notfalls von Hand mit `git tag -a` setzen |
 | `gh repo sync` kann nicht vorspulen | `main` steht nach `runde.nu starten` auf einem Stand der Probe | `nu scripts/zuruecksetzen.nu` |
+| Frischer Klon enthält schon Arbeit der Agenten; die Agenten melden, C1 oder O1 sei erledigt | Der `main` einer Probe wurde nach GitHub gepusht; `einrichten.nu` und `zuruecksetzen.nu` warnen dann | [[GITHUB]], Abschnitt 7 |

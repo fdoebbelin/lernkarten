@@ -1,5 +1,25 @@
 # Richtet das Projekt nach dem Entpacken ein: Git-Repository, Abhängigkeiten, Testlauf.
 # Aufruf im Projektordner: nu scripts/einrichten.nu
+
+# Merges von Agenten-Branches auf der Hauptlinie eines Stands. Die Vorlage darf keine enthalten:
+# Sie entstehen nur in einer Probe und gehören nie nach GitHub. Gleiche Funktion in zuruecksetzen.nu.
+def probe-merges [stand: string] {
+  let r = (do { git log --first-parent --merges --format="%h%x09%ad%x09%s" --date=short $stand } | complete)
+  if $r.exit_code != 0 { return [] }
+  $r.stdout | lines | split column "\t" commit datum betreff
+  | where {|m| $m.betreff =~ "^Merge branch '(claude|opencode)/" }
+}
+
+# Warnt, wenn ein Stand der Vorlage Merges aus einer Probe enthält.
+def warne-vor-probe [stand: string] {
+  let funde = (probe-merges $stand)
+  if ($funde | is-not-empty) {
+    print $"Achtung: ($stand) enthält Merges von Agenten-Branches und ist damit nicht im Startzustand der Vorlage:"
+    print $funde
+    print "Wahrscheinlich wurde der main einer Probe nach GitHub gepusht. Bereinigen: docs/GITHUB.md, Abschnitt 7."
+  }
+}
+
 def main [
   --ohne-npm  # Abhängigkeiten nicht installieren und keine Tests ausführen
 ] {
@@ -24,6 +44,8 @@ def main [
     print "Git-Repository mit Branch main angelegt."
   } else {
     print "Git-Repository ist schon vorhanden."
+    let hat_origin = ((do { git rev-parse --verify --quiet "origin/main^{commit}" } | complete).exit_code == 0)
+    warne-vor-probe (if $hat_origin { "origin/main" } else { "main" })
   }
 
   if not $ohne_npm {
