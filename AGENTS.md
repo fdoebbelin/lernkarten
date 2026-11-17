@@ -40,7 +40,7 @@ Diese Datei gilt für beide Agenten.
 | `src/ansichten/` | Vue-Komponenten, eine Datei je Ansicht |
 | `src-tauri/src/speicher.rs` | Laden und Speichern, ohne Tauri-Abhängigkeit, mit Tests |
 | `src-tauri/src/lib.rs` | Tauri-Befehle `lade_bestand` und `speichere_bestand` |
-| `scripts/` | Nushell-Skripte für Einrichtung, Worktrees, Konfliktprüfung, Rücksetzen |
+| `scripts/` | Nushell-Skripte für Einrichtung, Worktrees, Konfliktprüfung, Rücksetzen, Neustart einzelner Runden |
 | `uebergaben/` | Übergabedateien, eine je Branch; in der Vorlage nur die README |
 | `docs/` | Installation, Arbeitsblatt, Entwicklungsleitfaden, GitHub, Spickzettel |
 

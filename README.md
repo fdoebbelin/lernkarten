@@ -36,7 +36,7 @@ Einzelheiten in `docs/INSTALLATION.md`.
 | `.opencode/commands/` | Gleichnamige Kommandos für opencode, teils mit festem Modell |
 | `.claude/settings.json`, `opencode.json` | Modellvorgabe und Rechte je Agent |
 | `herdr/config.beispiel.toml` | herdr-Konfiguration zum Übernehmen |
-| `scripts/` | `voraussetzungen.nu`, `einrichten.nu`, `worktree.nu`, `konflikt-check.nu`, `zuruecksetzen.nu` |
+| `scripts/` | `voraussetzungen.nu`, `einrichten.nu`, `worktree.nu`, `konflikt-check.nu`, `zuruecksetzen.nu`, `runde.nu` |
 | `uebergaben/` | Übergabedateien, eine je Branch; in der Vorlage leer |
 
 ## Änderungen an der Vorlage
@@ -44,6 +44,10 @@ Einzelheiten in `docs/INSTALLATION.md`.
 Änderungen an Dokumentation, Skripten und Konfiguration laufen über Claude Code im Web und
 Pull Requests gegen `main`. Der lokale Klon wird mit `gh repo sync` nachgezogen und nach einer
 Vorführung mit `nu scripts/zuruecksetzen.nu --daten` zurückgesetzt. Ablauf in `docs/GITHUB.md`.
+
+Einzelne Runden lassen sich wiederholen: `nu scripts/runde.nu markieren` hält nach einer Probe
+die Startzustände als Tags fest, `nu scripts/runde.nu starten <n>` stellt einen davon wieder her.
+Ablauf in `docs/ARBEITSBLATT.md`, Abschnitt 9.1.
 
 ## Geprüft und nicht geprüft
 
