@@ -183,7 +183,7 @@ Quellen: [Claude Code im Pro-Plan](https://support.claude.com/en/articles/111458
    > `%APPDATA%` gilt nur in `cmd.exe`. PowerShell und Nushell lesen es als Ordnernamen und melden einen Pfad wie `C:\Users\…\%APPDATA%\herdr`. In PowerShell heißt die Variable `$env:APPDATA`, in Nushell `$env.APPDATA`.
 
    > [!note] Ort unter Windows
-   > Beobachtet am 17.11.2026 unter Windows mit herdr 0.9.5: Die Konfiguration liegt in `$env:APPDATA\herdr\config.toml`, die Laufzeitdaten wie Worktrees unter `~\.herdr`; einen Ordner `~\.config\herdr` gibt es dort nicht. Nicht aus der herdr-Dokumentation geprüft. Ob herdr die Datei liest, zeigt Schritt 4.
+   > Beobachtet am 17.11.2026 unter Windows mit herdr 0.9.5: Die Konfiguration liegt in `$env:APPDATA\herdr\config.toml`, die Laufzeitdaten wie Worktrees unter `~\.herdr`; einen Ordner `~\.config\herdr` gibt es dort nicht. Nicht aus der herdr-Dokumentation geprüft. Ob herdr die Datei liest, zeigt Schritt 4; ein zweiter Beleg folgt in 5.1: Mit der Beispielkonfiguration liegen die Worktrees unter `~/Projects/.worktrees`, ohne sie unter `~/.herdr/worktrees`.
 2. Neu laden:
 
    ```nu
@@ -242,7 +242,7 @@ Vor jeder Probe und jeder Vorführung.
    herdr
    ```
 
-4. `ctrl+b`, `shift+n`: Workspace `lernkarten` auf `main`. In der Seitenleiste steht darunter der Branch `main`.
+4. Prüfen: herdr hat beim Start den Workspace `lernkarten` selbst angelegt. In der Seitenleiste steht er unter „spaces“, darunter der Branch `main`. Keinen weiteren Workspace mit `ctrl+b`, `shift+n` anlegen; das ist nur nötig, wenn herdr in einem anderen Ordner gestartet wurde und `lernkarten` fehlt.
 
 5. Leitstand einrichten: Das erste Pane ist die Shell. `ctrl+b`, `v` teilt das Fenster; im rechten Pane:
 
@@ -251,6 +251,9 @@ Vor jeder Probe und jeder Vorführung.
    ```
 
    Danach in Claude Code `/effort high`.
+
+   > [!tip] Alternative: eigener Tab
+   > Statt das Fenster zu teilen, genügt ein neuer Tab im Workspace `lernkarten`: In der Seitenleiste `lernkarten` wählen, dann `+` neben der Tab-Nummer oder `ctrl+b`, `c`. Weil die Beispielkonfiguration `new_cwd = "follow"` setzt, übernimmt der Tab das Verzeichnis des zuletzt aktiven Panes; vor `claude` deshalb mit `pwd` prüfen, dass es `…/Projects/lernkarten` ohne `.worktrees` ist. Der Leitstand muss im Haupt-Checkout auf `main` laufen. Für das Publikum ist das geteilte Fenster anschaulicher, weil Shell und Leitstand gleichzeitig zu sehen sind; im Tab wechseln Sie mit `ctrl+b`, `n` und `p`. Schritt 6 gilt unverändert, die Shell steht dann im ersten Tab.
 
 6. Den Agenten benennen. In der Shell links:
 
@@ -298,7 +301,7 @@ nu scripts/worktree.nu opencode/csv
 Erwartet: In der Seitenleiste erscheinen unter `lernkarten` zwei neue Workspaces `claude/persistenz` und `opencode/csv`.
 
 > [!note] Ablageort der Worktrees
-> herdr legt sie unter `worktrees.directory` ab. Mit der Beispielkonfiguration aus `herdr/config.beispiel.toml` ist das `~/Projects/.worktrees/lernkarten/<branch-slug>`. Ohne sie liegen sie im herdr-Standard `~/.herdr/worktrees/lernkarten/<branch-slug>` (beobachtet am 16.11.2026 unter Windows; nicht aus der herdr-Dokumentation geprüft). Ohne die Beispielkonfiguration fehlen auch die Tasten `ctrl+b`, `alt+g` und `ctrl+b`, `alt+k`; die Konfliktprüfung läuft dann in der Shell mit `nu scripts/konflikt-check.nu`.
+> herdr legt sie unter `worktrees.directory` ab. Mit der Beispielkonfiguration aus `herdr/config.beispiel.toml` ist das `~/Projects/.worktrees/lernkarten/<branch-slug>`. Ohne sie liegen sie im herdr-Standard `~/.herdr/worktrees/lernkarten/<branch-slug>` (beobachtet am 16.11.2026 unter Windows; nicht aus der herdr-Dokumentation geprüft). Mit der Beispielkonfiguration unter `$env:APPDATA\herdr\config.toml` lagen sie am 17.11.2026 unter Windows in `~\Projects\.worktrees\lernkarten\`. Die Ausgabe von `worktree.nu` ist das JSON von `herdr worktree create` und nennt den Pfad. Ohne die Beispielkonfiguration fehlen auch die Tasten `ctrl+b`, `alt+g` und `ctrl+b`, `alt+k`; die Konfliktprüfung läuft dann in der Shell mit `nu scripts/konflikt-check.nu`.
 
 Erscheinen sie nicht, hat das Skript herdr nicht erkannt und reine Git-Worktrees unter `../lernkarten.worktrees/` angelegt. Dann diese entfernen und die Worktrees in herdr anlegen:
 
