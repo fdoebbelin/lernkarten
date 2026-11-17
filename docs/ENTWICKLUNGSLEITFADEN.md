@@ -62,7 +62,7 @@ herdr gruppiert Worktree-Workspaces in der Seitenleiste unter dem Workspace, aus
 
 ### Ein Projekt anlegen
 
-1. In einer Shell ins Repository wechseln und `ctrl+b`, `shift+n` drücken: neuer Workspace, benannt nach dem Repo.
+1. Workspace für das Repository: Wird herdr im Repository gestartet, legt es ihn selbst an, benannt nach dem Ordner. Läuft herdr schon in einem anderen Ordner, in einer Shell ins Repository wechseln und `ctrl+b`, `shift+n` drücken.
 2. `ctrl+b`, `shift+g` drücken und als Branch `claude/<thema>` eingeben. herdr legt den Branch und den Checkout an und öffnet ihn als gruppierten Workspace.
 3. Dort `claude` starten, mit `ctrl+b`, `v` eine Shell daneben öffnen.
 4. Mit `ctrl+b`, `w` zum Eltern-Workspace zurück, Schritt 2 und 3 mit `opencode/<thema>` und `opencode` wiederholen.
