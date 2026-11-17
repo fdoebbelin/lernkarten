@@ -131,8 +131,9 @@ def "main liste" [] {
   } | compact)
 
   if ($zeilen | is-empty) {
-    print "Keine Tags der Runden vorhanden. Holen mit: git fetch origin --tags"
-    print "Setzen nach einer Probe mit: nu scripts/runde.nu markieren"
+    print "Keine Tags der Runden vorhanden."
+    print "Sie entstehen nach einer Probe mit: nu scripts/runde.nu markieren"
+    print "Liegen sie schon auf GitHub, holt sie: git fetch origin --tags"
     return
   }
   print $zeilen
