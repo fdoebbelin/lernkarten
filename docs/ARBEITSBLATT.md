@@ -58,7 +58,7 @@ Die Namen vergeben Sie mit `herdr agent rename`. Über sie schicken sich die Age
 | Worktree-Ablage ohne herdr | `../lernkarten.worktrees/<branch-slug>` |
 | Übergabedatei | `uebergaben/<branch mit - statt />.md` |
 | Konfliktprüfung | `nu scripts/konflikt-check.nu`, in herdr `ctrl+b`, `alt+k` |
-| Startzustände der Runden | Tags `runde-2`, `runde-3`, `runde-4`, `ende`; `nu scripts/runde.nu`, Abschnitt 9.1 |
+| Startzustände der Runden | Tags `runde-1` bis `runde-4` und `ende`; `nu scripts/runde.nu`, Abschnitt 9.1 |
 
 Der Startzustand zeigt zwei Beispielstapel mit der Zahl fälliger Karten. Gespeichert, gelernt und bearbeitet wird noch nicht; das entsteht in den Runden.
 
@@ -993,17 +993,17 @@ Abnahme in der App: Die Statistik zeigt für die Beispieldaten die richtige Zahl
 
 ### 9.1 Startzustände sichern und Runden einzeln wiederholen
 
-Jede Runde baut auf der vorigen auf: Runde 3 braucht die Ansichten aus Runde 2, Runde 4 die Felder aus Runde 3. Wer eine Runde noch einmal zeigen will, braucht deshalb den Stand von `main` an ihrem Anfang. Diese Stände entstehen nur in einer Probe, als letzter Merge der vorigen Runde. `scripts/runde.nu` hält sie als Tags fest und stellt sie wieder her.
+Jede Runde baut auf der vorigen auf: Runde 3 braucht die Ansichten aus Runde 2, Runde 4 die Felder aus Runde 3. Wer eine Runde noch einmal zeigen will, braucht deshalb den Stand von `main` an ihrem Anfang. Diese Stände entstehen in einer Probe: Der letzte Merge einer Runde ist der Start der nächsten. `scripts/runde.nu` hält sie als Tags fest und stellt sie wieder her.
 
-| Tag | Zeigt auf den letzten Merge von | Weiter im Arbeitsblatt bei |
+| Tag | Zeigt auf | Weiter im Arbeitsblatt bei |
 | --- | --- | --- |
-| keins, Stand von GitHub | – | Abschnitt 5, Runde 1 |
-| `runde-2` | `claude/persistenz`, `opencode/csv` | Abschnitt 6 |
-| `runde-3` | `opencode/sitzung`, `opencode/bearbeiten`, `claude/ansichten` | Abschnitt 7 |
-| `runde-4` | `claude/notiz`, `opencode/schlagworte` | Abschnitt 8 |
-| `ende` | `claude/statistik`, `opencode/statistik` | Abschnitt 9 |
+| `runde-1` | den Commit vor dem ersten Merge von `claude/persistenz` oder `opencode/csv`, also die Vorlage zu Beginn der Probe | Abschnitt 5 |
+| `runde-2` | den letzten Merge von `claude/persistenz`, `opencode/csv` | Abschnitt 6 |
+| `runde-3` | den letzten Merge von `opencode/sitzung`, `opencode/bearbeiten`, `claude/ansichten` | Abschnitt 7 |
+| `runde-4` | den letzten Merge von `claude/notiz`, `opencode/schlagworte` | Abschnitt 8 |
+| `ende` | den letzten Merge von `claude/statistik`, `opencode/statistik` | Abschnitt 9 |
 
-Runde 1 braucht kein Tag: Sie beginnt immer mit dem Stand von GitHub, also mit der aktuellen Vorlage.
+`runde-1` hält fest, mit welcher Fassung der Vorlage die Probe begann. Solange die Vorlage auf GitHub unverändert ist, ist das derselbe Stand wie `origin/main`. Wird sie nach der Probe weiterentwickelt, passen `runde-2` bis `ende` nur noch zu `runde-1`, nicht mehr zur neuen Vorlage.
 
 **Tags setzen**, nach der Probe und vor dem Zurücksetzen, im Haupt-Checkout:
 
@@ -1011,7 +1011,7 @@ Runde 1 braucht kein Tag: Sie beginnt immer mit dem Stand von GitHub, also mit d
 nu scripts/runde.nu markieren
 ```
 
-Das Skript sucht in `main` die Merges der Runden, zeigt die Zuordnung und fragt nach. Es erkennt die Merges an der Nachricht „Merge branch '…'“, die `git merge --no-ff --no-edit` schreibt. Ein vorgespulter Merge ohne `--no-ff` hinterlässt keinen Merge-Commit und wird nicht gefunden. Eine abgebrochene Probe ergibt nur die Tags der fertigen Runden.
+Das Skript sucht in `main` die Merges der Runden, zeigt die Zuordnung und fragt nach. Es erkennt die Merges an der Nachricht „Merge branch '…'“, die `git merge --no-ff --no-edit` schreibt. Ein vorgespulter Merge ohne `--no-ff` hinterlässt keinen Merge-Commit und wird nicht gefunden. Eine abgebrochene Probe ergibt nur die Tags der fertigen Runden; nach Runde 1 sind das `runde-1` und `runde-2`. Vorhandene Tags bleiben unverändert, deshalb darf nach jeder Runde markiert werden.
 
 Ist der Klon schon zurückgesetzt, steht der alte Stand noch im Reflog, etwa 30 Tage lang:
 
@@ -1025,7 +1025,7 @@ Als `<hash>` den Eintrag vor „reset: moving to origin/main“ nehmen.
 **Tags auf GitHub sichern.** Das überträgt nur die Tags und die Commits, auf die sie zeigen; `main` auf GitHub bleibt im Startzustand:
 
 ```nu
-git push origin runde-2 runde-3 runde-4 ende
+git push origin runde-1 runde-2 runde-3 runde-4 ende
 ```
 
 Auf einem zweiten Rechner holt `git fetch origin --tags` sie ab. `nu scripts/runde.nu liste` zeigt, welche Tags vorhanden sind.
@@ -1038,6 +1038,12 @@ npm install
 ```
 
 Das Skript holt die Tags von GitHub, ruft `scripts/zuruecksetzen.nu` auf und setzt `main` danach hart auf `runde-3`. Ab hier gilt das Arbeitsblatt unverändert, im Beispiel ab Abschnitt 7. `--daten` löscht `lernkarten.json`, damit die App mit den Beispielstapeln startet.
+
+Runde 1 startet mit `runde-1`, wenn das Tag vorhanden ist, sonst mit `origin/main`. Ist die Vorlage neuer als `runde-1`, warnt das Skript; `main` liegt danach hinter GitHub, nicht davor. Runde 1 mit der aktuellen Vorlage, unabhängig vom Tag:
+
+```nu
+nu scripts/runde.nu starten 1 --vorlage
+```
 
 > [!warning] `main` steht jetzt vor GitHub
 > Nach `starten` mit Runde 2 bis 4 enthält der lokale `main` Commits der Probe. `git push` würde sie ohne Rückfrage nach GitHub übertragen und die Vorlage überschreiben. Diesen Stand nie pushen. Zurück zur Vorlage mit `nu scripts/zuruecksetzen.nu`; die Tags bleiben dabei erhalten.
