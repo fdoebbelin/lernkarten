@@ -267,6 +267,9 @@ nu scripts/worktree.nu opencode/csv
 
 Erwartet: In der Seitenleiste erscheinen unter `lernkarten` zwei neue Workspaces `claude/persistenz` und `opencode/csv`.
 
+> [!note] Ablageort der Worktrees
+> herdr legt sie unter `worktrees.directory` ab. Mit der Beispielkonfiguration aus `herdr/config.beispiel.toml` ist das `~/Projects/.worktrees/lernkarten/<branch-slug>`. Ohne sie liegen sie im herdr-Standard `~/.herdr/worktrees/lernkarten/<branch-slug>` (beobachtet am 16.11.2026 unter Windows; nicht aus der herdr-Dokumentation geprüft). Ohne die Beispielkonfiguration fehlen auch die Tasten `ctrl+b`, `alt+g` und `ctrl+b`, `alt+k`; die Konfliktprüfung läuft dann in der Shell mit `nu scripts/konflikt-check.nu`.
+
 Erscheinen sie nicht, hat das Skript herdr nicht erkannt und reine Git-Worktrees unter `../lernkarten.worktrees/` angelegt. Dann diese entfernen und die Worktrees in herdr anlegen:
 
 ```nu
@@ -293,13 +296,20 @@ Danach `ctrl+b`, `shift+g`, Branch `claude/persistenz` eingeben; dasselbe für `
    opencode
    ```
 
-3. Zurück in den Workspace `lernkarten`, in der Shell:
+3. Zurück in den Workspace `lernkarten`, in der Shell die Namen prüfen:
 
    ```nu
    herdr agent list
+   ```
+
+   Tragen beide Agenten das Feld `name` mit `claude-persistenz` und `opencode-csv`, ist nichts zu tun. Fehlt es bei einem, vergeben Sie den Namen mit der `pane_id` aus der Ausgabe; die Pane mit `claude` im Worktree `claude-persistenz` gehört zu `claude-persistenz`, die mit `opencode` zu `opencode-csv`:
+
+   ```nu
    herdr agent rename <pane-id-claude> claude-persistenz
    herdr agent rename <pane-id-opencode> opencode-csv
    ```
+
+   Ob ein Name schon gilt, zeigt auch `herdr agent read claude-persistenz --source recent-unwrapped --lines 5`: Kommt Text, existiert er; kommt ein Fehler, fehlt er.
 
 Erwartet: Die Seitenleiste zeigt drei Agenten: `leitstand`, `claude-persistenz`, `opencode-csv`.
 
@@ -449,7 +459,7 @@ Wenn `opencode-csv` „fertig“ meldet, im Workspace `opencode/csv`:
    npx vitest list src/domain/csv.test.ts -t kartenZuCsv
    ```
 
-2. Gegenprobe, ob der Test Fehler findet: In `src/domain/csv.ts` beim Export das Trennzeichen vorübergehend von `;` auf `,` ändern, Test erneut ausführen. Er muss fehlschlagen. Dann zurücknehmen:
+2. Gegenprobe, ob der Test Fehler findet: In `src/domain/csv.ts` nur im Export das Trennzeichen vorübergehend von `;` auf `,` ändern, den Import unverändert lassen, und den Test erneut ausführen. Er muss fehlschlagen. Haben Export und Import eine gemeinsame Konstante `TRENNER`, ändern Sie nicht diese, denn dann ändert sich der Import mit und die Rundreise bleibt grün. Ändern Sie stattdessen in `kartenZuCsv` den Aufruf `.join(TRENNER)` auf `.join(",")`. Dann zurücknehmen:
 
    ```nu
    git checkout -- src/domain/csv.ts
@@ -535,7 +545,7 @@ npm run typen
 cargo test --manifest-path src-tauri/Cargo.toml
 ```
 
-`git status` muss vorher „working tree clean“ zeigen. Erwartet: mehr als 9 Frontend-Tests, alle grün. Zahl notieren.
+`git status` muss vorher „working tree clean“ zeigen. Erwartet: mindestens 16 Frontend-Tests, alle grün (9 aus dem Startzustand, mindestens 1 aus C1, mindestens 6 aus O1). Die genaue Zahl bestimmen die Agenten selbst; beim Probelauf am 16.11.2026 waren es 44.
 
 > [!note] Vorführung
 > `lazygit` mit `ctrl+b`, `alt+g` zeigt die beiden Merges im Graphen. Vergleichen Sie mit dem Diagramm am Anfang der Runde.
