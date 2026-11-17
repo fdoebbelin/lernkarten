@@ -595,6 +595,9 @@ cargo test --manifest-path src-tauri/Cargo.toml
 
    `-d` löscht nur vollständig zusammengeführte Branches. Meldet Git einen Fehler, ist ein Merge nicht gelaufen.
 
+> [!tip] Startzustand sichern
+> Optional, solange der Klon nicht zurückgesetzt ist: `nu scripts/runde.nu markieren` setzt `runde-1` und `runde-2`. Vorhandene Tags bleiben unverändert. Danach auf GitHub sichern mit `git push origin runde-1 runde-2`. Abschnitt 9.1.
+
 ## 6. Runde 2: Zuarbeit und Integration
 
 **Ziel:** Zwei opencode-Sitzungen liefern parallel getestete Fachlogik. Der Leitstand prüft beides. Danach baut Claude Code die Oberfläche darauf, und opencode gibt die Zweitmeinung. Nur Claude ändert geteilte Dateien.
@@ -789,6 +792,9 @@ herdr agent prompt claude-ansichten "Befunde aus der Zweitmeinung: <hier einfüg
 
 Konfliktprüfung, zusammenführen, aufräumen wie in Runde 1. `opencode-pruefer` bleibt für die nächsten Runden offen; dort `/new` für eine frische Sitzung.
 
+> [!tip] Startzustand sichern
+> Optional, solange der Klon nicht zurückgesetzt ist: `nu scripts/runde.nu markieren` setzt `runde-3`. Vorhandene Tags bleiben unverändert. Danach auf GitHub sichern mit `git push origin runde-3`. Abschnitt 9.1.
+
 ## 7. Runde 3: Gewollter Konflikt
 
 **Ziel:** Beide Agenten ergänzen an derselben Stelle der Karte ein Feld. Die Konfliktprüfung schlägt an, Claude löst per Rebase, opencode liest gegen.
@@ -930,6 +936,9 @@ Lassen Sie den Leitstand die Ausgabe deuten: im Leitstand `/konfliktcheck`. Er e
 | Ein Feld fehlt nach dem Rebase | Mit `git reflog` den Stand vor dem Rebase finden und Claude neu ansetzen lassen. |
 | Konflikt selbst entscheiden | Im Worktree `git mergetool`; öffnet Meld mit beiden Seiten und dem Ursprung. |
 
+> [!tip] Startzustand sichern
+> Optional, solange der Klon nicht zurückgesetzt ist: `nu scripts/runde.nu markieren` setzt `runde-4`. Vorhandene Tags bleiben unverändert. Danach auf GitHub sichern mit `git push origin runde-4`. Die Tags `konflikt-notiz` und `konflikt-schlagworte` müssen vor 7.5 gesetzt sein, siehe 7.4. Abschnitt 9.1.
+
 ## 8. Runde 4: Staffel bei knappem Kontingent
 
 **Ziel:** Claude beginnt die Statistik, schreibt eine genaue Übergabe, und opencode baut auf diesem Stand weiter. Das zeigt, wie die Arbeit weiterläuft, wenn das Limit des Pro-Plans erreicht ist.
@@ -1005,6 +1014,9 @@ git branch -d opencode/statistik claude/statistik
 Erwartet: Das Log zeigt Commits beider Agenten. Nur `opencode/statistik` wird zusammengeführt; er enthält Claudes Arbeit. Danach lässt sich auch `claude/statistik` mit `-d` löschen.
 
 Abnahme in der App: Die Statistik zeigt für die Beispieldaten die richtige Zahl je Fach.
+
+> [!tip] Ergebnis sichern
+> Optional, solange der Klon nicht zurückgesetzt ist: `nu scripts/runde.nu markieren` setzt `ende`. Vorhandene Tags bleiben unverändert. Danach auf GitHub sichern mit `git push origin ende`. Abschnitt 9.1.
 
 ## 9. Abschluss
 
