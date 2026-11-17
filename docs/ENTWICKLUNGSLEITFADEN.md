@@ -1,6 +1,6 @@
 ---
 title: Entwicklungsleitfaden herdr mit Claude Code und opencode
-date: 2026-11-11
+date: 2026-11-17
 tags: [herdr, claude-code, opencode, git-worktree, leitfaden]
 ---
 
@@ -321,6 +321,8 @@ Alle Tasten folgen auf das Präfix `ctrl+b`. Die Zeilen mit Stern setzen `herdr/
 | `nu scripts/worktree.nu <branch> [--basis <ref>]` | Worktree anlegen |
 | `nu scripts/konflikt-check.nu` | Konfliktprüfung |
 | `nu scripts/zuruecksetzen.nu` | Klon nach der Vorführung auf den Stand von GitHub zurücksetzen |
+| `nu scripts/runde.nu markieren` | Startzustände der Runden einer Probe als Tags setzen |
+| `nu scripts/runde.nu starten <n>` | Klon zurücksetzen und `main` auf den Startzustand von Runde n |
 | `herdr worktree list` | Worktrees des Repositories |
 | `herdr agent list` | Agenten mit Status |
 | `herdr agent prompt <name> "<auftrag>" --wait` | Auftrag senden und auf das Ergebnis warten |

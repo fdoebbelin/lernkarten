@@ -1,6 +1,6 @@
 ---
 title: Projekt Lernkarten auf GitHub
-date: 2026-11-12
+date: 2026-11-17
 tags: [github, claude-code, gh, vorführung]
 ---
 
@@ -109,7 +109,7 @@ npm install
 
 `gh repo sync` holt den Stand von GitHub und spult `main` vor. `npm install` ist nötig, falls ein Pull Request Abhängigkeiten geändert hat. Gleichwertig zu `gh repo sync` ist `git pull --ff-only`.
 
-Meldet `gh repo sync`, dass es nicht vorspulen kann, liegen auf dem lokalen `main` noch Commits aus einer Probe. Dann zuerst zurücksetzen, Abschnitt 6.
+Meldet `gh repo sync`, dass es nicht vorspulen kann, liegen auf dem lokalen `main` noch Commits aus einer Probe, auch nach `nu scripts/runde.nu starten`. Dann zuerst zurücksetzen, Abschnitt 6.
 
 Auf einem zweiten Rechner, etwa dem XPS, einmalig klonen:
 
@@ -134,6 +134,15 @@ git push origin main:probe/2026-11-12
 
 Das legt auf GitHub einen Branch `probe/2026-11-12` mit dem Stand an, ohne `main` zu verändern. Die Konfliktprüfung beachtet nur Branches mit `claude/` und `opencode/` und lässt ihn in Ruhe.
 
+Um einzelne Runden später erneut vorzuführen, die Startzustände der Runden als Tags sichern, vor dem Zurücksetzen:
+
+```nu
+nu scripts/runde.nu markieren
+git push origin runde-2 runde-3 runde-4 ende
+```
+
+Eine Runde startet dann mit `nu scripts/runde.nu starten <n> --daten` von ihrem Startzustand. Ablauf, Grenzen und Warnungen im [[ARBEITSBLATT]], Abschnitt 9.1. Danach steht der lokale `main` vor GitHub: nie pushen, sondern mit `zuruecksetzen.nu` zurück zur Vorlage.
+
 ## 6. Nach der Vorführung zurücksetzen
 
 1. In herdr alle Agenten beenden und die Workspaces der Worktrees schließen (`ctrl+b`, `shift+d`). Laufende `tauri dev` stoppen.
@@ -152,7 +161,7 @@ Das Skript zeigt zuerst, was es tun wird, und fragt nach:
 | `main` zurücksetzen | Hart auf `origin/main`; lokale Commits auf `main` gehen verloren |
 | `--daten` | Löscht `lernkarten.json` im App-Datenverzeichnis, damit die App wieder mit den Beispielstapeln startet |
 
-Danach ist der Klon im selben Zustand wie GitHub und bereit für die nächste Vorführung. Wer ein Ergebnis aufheben will, pusht es vorher nach Abschnitt 5.
+Danach ist der Klon im selben Zustand wie GitHub und bereit für die nächste Vorführung. Wer ein Ergebnis aufheben will, pusht es vorher nach Abschnitt 5. Tags lässt das Skript unverändert.
 
 ## Ihre bisherige Probe
 
