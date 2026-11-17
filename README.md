@@ -56,7 +56,8 @@ die Tests des Rust-Moduls `speicher.rs` (5 Tests) und alle Nushell-Skripte mit N
 und Git 2.43 unter Linux. In einer Probe unter Windows on ARM liefen Einrichtung, Tests,
 `npm run tauri dev` und Runde 1 bis zur Konfliktprüfung.
 
-`scripts/runde.nu` ist mit Nushell 0.101 unter Linux an einer nachgestellten Probe geprüft:
+`scripts/runde.nu` ist mit Nushell 0.101 unter Linux an einer nachgestellten Probe geprüft,
+seit dem 17.11.2026 einschließlich `runde-1` und `starten 1 --vorlage`:
 Markieren, auch aus dem Reflog, Versetzen mit `--erneuern`, Liste, Neustart der Runden 1 und 4
 samt `--daten` und die Fehlerfälle.
 

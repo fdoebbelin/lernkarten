@@ -4,18 +4,28 @@
 #   nu scripts/runde.nu liste                      vorhandene Tags zeigen
 #   nu scripts/runde.nu starten <n> [--daten]      Klon zurücksetzen, main auf den Start von Runde n
 #
-# Runde 1 beginnt immer mit dem Stand von GitHub (origin/main) und braucht kein Tag.
-# Die übrigen Startzustände entstehen erst in einer Probe: Der letzte Merge einer Runde
-# in main ist der Start der nächsten.
+# Die Startzustände entstehen in einer Probe: runde-1 ist der Stand von main vor dem ersten
+# Merge der Probe, also die Vorlage, mit der sie begann. Der letzte Merge einer Runde in main
+# ist der Start der nächsten. Ohne Tag runde-1 beginnt Runde 1 mit origin/main.
 
-# Welche Branches zu welcher Runde gehören und welches Tag ihr letzter Merge erhält.
+# Welche Branches zu welcher Runde gehören und welches Tag ihr Merge erhält.
+# vor_merge: Das Tag kommt vor den ältesten Merge der Runde, sonst auf ihren neuesten.
 def marken [] {
   [
-    {tag: "runde-2", abschnitt: "6", bedeutung: "Start Runde 2, nach C1 und O1", branches: ["claude/persistenz", "opencode/csv"]}
-    {tag: "runde-3", abschnitt: "7", bedeutung: "Start Runde 3, nach O2, O3 und C3", branches: ["opencode/sitzung", "opencode/bearbeiten", "claude/ansichten"]}
-    {tag: "runde-4", abschnitt: "8", bedeutung: "Start Runde 4, nach C4 und O5", branches: ["claude/notiz", "opencode/schlagworte"]}
-    {tag: "ende", abschnitt: "9", bedeutung: "Ende Runde 4, nach C5 und O6", branches: ["claude/statistik", "opencode/statistik"]}
+    {tag: "runde-1", vor_merge: true, bedeutung: "Start Runde 1, Vorlage zu Beginn der Probe", branches: ["claude/persistenz", "opencode/csv"]}
+    {tag: "runde-2", vor_merge: false, bedeutung: "Start Runde 2, nach C1 und O1", branches: ["claude/persistenz", "opencode/csv"]}
+    {tag: "runde-3", vor_merge: false, bedeutung: "Start Runde 3, nach O2, O3 und C3", branches: ["opencode/sitzung", "opencode/bearbeiten", "claude/ansichten"]}
+    {tag: "runde-4", vor_merge: false, bedeutung: "Start Runde 4, nach C4 und O5", branches: ["claude/notiz", "opencode/schlagworte"]}
+    {tag: "ende", vor_merge: false, bedeutung: "Ende Runde 4, nach C5 und O6", branches: ["claude/statistik", "opencode/statistik"]}
   ]
+}
+
+# Kurzhash und Datum eines Commits.
+def commit-info [voll: string] {
+  {
+    kurz: (git rev-parse --short $voll | str trim),
+    datum: (git log -1 --format=%ad --date=short $voll | str trim),
+  }
 }
 
 # Bricht ab, wenn das Skript nicht im Haupt-Checkout läuft.
@@ -44,11 +54,11 @@ def main [] {
   print "Aufruf:"
   print "  nu scripts/runde.nu markieren [stand] [--ja] [--erneuern]"
   print "  nu scripts/runde.nu liste"
-  print "  nu scripts/runde.nu starten <runde> [--ja] [--daten]"
+  print "  nu scripts/runde.nu starten <runde> [--ja] [--daten] [--vorlage]"
   print "Einzelheiten: docs/ARBEITSBLATT.md, Abschnitt 9.1."
 }
 
-# Setzt die Tags runde-2, runde-3, runde-4 und ende auf die Merges einer Probe.
+# Setzt die Tags runde-1 bis runde-4 und ende anhand der Merges einer Probe.
 def "main markieren" [
   stand: string = "main"  # Stand der Probe, etwa main oder ein Hash aus git reflog main
   --ja                    # ohne Rückfrage ausführen
@@ -66,16 +76,25 @@ def "main markieren" [
         $m | insert branch (if ($treffer | is-empty) { "" } else { $treffer.0.branch })
       })
 
-  # git log liefert die neuesten Merges zuerst; der erste Treffer ist der letzte Merge der Runde.
+  # git log liefert die neuesten Merges zuerst: first ist der letzte Merge einer Runde,
+  # last der erste. runde-1 kommt auf den Vorgänger des ersten Merges von Runde 1.
   let plan = (marken | each {|r|
     let treffer = ($merges | where {|m| $m.branch in $r.branches })
     if ($treffer | is-empty) {
-      {tag: $r.tag, commit: "", datum: "", merge: "nicht gefunden", bisher: "", bedeutung: $r.bedeutung, voll: ""}
+      {tag: $r.tag, commit: "", datum: "", merge: "nicht gefunden", bisher: "", bedeutung: $r.bedeutung, voll: "", probe: ""}
     } else {
-      let m = ($treffer | first)
+      let ziel = (if $r.vor_merge {
+        let m = ($treffer | last)
+        let voll = (git rev-parse $"($m.voll)^1" | str trim)
+        let info = (commit-info $voll)
+        {voll: $voll, kurz: $info.kurz, datum: $info.datum, merge: $"vor ($m.branch)", probe: $m.datum}
+      } else {
+        let m = ($treffer | first)
+        {voll: $m.voll, kurz: $m.kurz, datum: $m.datum, merge: $m.branch, probe: $m.datum}
+      })
       let alt = (commit-von $"refs/tags/($r.tag)")
-      let bisher = (if $alt == null { "neu" } else if $alt == $m.voll { "unverändert" } else { "zeigt woanders hin" })
-      {tag: $r.tag, commit: $m.kurz, datum: $m.datum, merge: $m.branch, bisher: $bisher, bedeutung: $r.bedeutung, voll: $m.voll}
+      let bisher = (if $alt == null { "neu" } else if $alt == $ziel.voll { "unverändert" } else { "zeigt woanders hin" })
+      {tag: $r.tag, commit: $ziel.kurz, datum: $ziel.datum, merge: $ziel.merge, bisher: $bisher, bedeutung: $r.bedeutung, voll: $ziel.voll, probe: $ziel.probe}
     }
   })
 
@@ -101,7 +120,7 @@ def "main markieren" [
   }
 
   for p in $zu_setzen {
-    git tag --annotate --force $p.tag $p.voll -m $"($p.bedeutung). Probe vom ($p.datum)."
+    git tag --annotate --force $p.tag $p.voll -m $"($p.bedeutung). Probe vom ($p.probe)."
   }
 
   let namen = ($zu_setzen.tag | str join " ")
@@ -147,6 +166,7 @@ def "main starten" [
   runde: int  # 1 bis 4
   --ja        # ohne Rückfrage ausführen
   --daten     # zusätzlich lernkarten.json im App-Datenverzeichnis löschen
+  --vorlage   # Runde 1 mit dem aktuellen Stand von GitHub statt mit dem Tag runde-1
 ] {
   if $runde < 1 or $runde > 4 {
     error make {msg: "Runde muss 1, 2, 3 oder 4 sein."}
@@ -162,15 +182,21 @@ def "main starten" [
     print $"Hinweis: git fetch --tags meldet ($abruf.stderr | str trim)"
   }
 
-  let tag = (if $runde == 1 { "origin/main" } else { $"runde-($runde)" })
+  # Runde 1 nimmt das Tag runde-1, wenn es existiert; sonst und mit --vorlage origin/main.
+  let tag = (if $runde == 1 {
+    if $vorlage or (commit-von "refs/tags/runde-1") == null { "origin/main" } else { "runde-1" }
+  } else { $"runde-($runde)" })
   if (commit-von $tag) == null {
     error make {msg: $"Tag ($tag) fehlt, auch auf GitHub. Erst eine Probe durchlaufen und mit nu scripts/runde.nu markieren setzen."}
   }
   let abschnitt = ($runde + 4)
 
   print $"Startzustand Runde ($runde): ($tag) = (git log -1 --format='%h %ad %s' --date=short $tag | str trim)"
-  if $runde > 1 and (enthaelt-vorlage $tag) == "nein" {
+  if $tag != "origin/main" and (enthaelt-vorlage $tag) == "nein" {
     print "Achtung: Die Vorlage auf GitHub ist neuer als dieses Tag. Doku, Skills und Skripte stammen aus der Probe."
+    if $runde == 1 {
+      print "Runde 1 mit der aktuellen Vorlage: nu scripts/runde.nu starten 1 --vorlage"
+    }
   }
   print "Ablauf: erst scripts/zuruecksetzen.nu, dann main auf diesen Stand."
 
@@ -190,13 +216,22 @@ def "main starten" [
     error make {msg: "zuruecksetzen.nu ist fehlgeschlagen; main wurde nicht versetzt."}
   }
 
-  if $runde > 1 {
+  if $tag != "origin/main" {
     git reset --hard $tag
-    let vorsprung = (git rev-list --count origin/main..main | str trim)
+    let vorsprung = (git rev-list --count origin/main..main | str trim | into int)
+    let rueckstand = (git rev-list --count main..origin/main | str trim | into int)
     print ""
-    print $"main steht auf ($tag), ($vorsprung) Commits vor origin/main."
-    print "Diesen Stand nie pushen: git push würde ihn ohne Rückfrage zur Vorlage machen."
-    print "Zurück zum Stand von GitHub: nu scripts/zuruecksetzen.nu"
+    if $vorsprung > 0 {
+      print $"main steht auf ($tag), ($vorsprung) Commits vor origin/main."
+      print "Diesen Stand nie pushen: git push würde ihn ohne Rückfrage zur Vorlage machen."
+    } else if $rueckstand > 0 {
+      print $"main steht auf ($tag), ($rueckstand) Commits hinter origin/main: die Vorlage zu Beginn der Probe."
+    } else {
+      print $"main steht auf ($tag), gleich origin/main."
+    }
+    if $vorsprung > 0 or $rueckstand > 0 {
+      print "Zurück zum Stand von GitHub: nu scripts/zuruecksetzen.nu"
+    }
   }
   print $"Weiter mit npm install und im Arbeitsblatt bei Abschnitt ($abschnitt)."
 }

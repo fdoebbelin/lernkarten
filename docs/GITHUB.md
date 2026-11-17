@@ -138,10 +138,10 @@ Um einzelne Runden später erneut vorzuführen, die Startzustände der Runden al
 
 ```nu
 nu scripts/runde.nu markieren
-git push origin runde-2 runde-3 runde-4 ende
+git push origin runde-1 runde-2 runde-3 runde-4 ende
 ```
 
-Eine Runde startet dann mit `nu scripts/runde.nu starten <n> --daten` von ihrem Startzustand. Ablauf, Grenzen und Warnungen im [[ARBEITSBLATT]], Abschnitt 9.1. Danach steht der lokale `main` vor GitHub: nie pushen, sondern mit `zuruecksetzen.nu` zurück zur Vorlage.
+Eine Runde startet dann mit `nu scripts/runde.nu starten <n> --daten` von ihrem Startzustand. Ablauf, Grenzen und Warnungen im [[ARBEITSBLATT]], Abschnitt 9.1. Nach Runde 2 bis 4 steht der lokale `main` vor GitHub: nie pushen, sondern mit `zuruecksetzen.nu` zurück zur Vorlage.
 
 ## 6. Nach der Vorführung zurücksetzen
 
