@@ -4,6 +4,16 @@
 #
 # Aufruf im Haupt-Checkout: nu scripts/zuruecksetzen.nu [--ja] [--daten]
 # Vorher in herdr die Workspaces der Worktrees schließen und alle Agenten beenden.
+
+# Merges von Agenten-Branches auf der Hauptlinie eines Stands. Die Vorlage darf keine enthalten:
+# Sie entstehen nur in einer Probe und gehören nie nach GitHub. Gleiche Funktion in einrichten.nu.
+def probe-merges [stand: string] {
+  let r = (do { git log --first-parent --merges --format="%h%x09%ad%x09%s" --date=short $stand } | complete)
+  if $r.exit_code != 0 { return [] }
+  $r.stdout | lines | split column "\t" commit datum betreff
+  | where {|m| $m.betreff =~ "^Merge branch '(claude|opencode)/" }
+}
+
 def main [
   --ja      # ohne Rückfrage ausführen
   --daten   # zusätzlich lernkarten.json im App-Datenverzeichnis löschen
@@ -88,4 +98,14 @@ def main [
   }
 
   print $"Zurückgesetzt auf origin/main in ($wurzel)."
+
+  # Zurücksetzen hilft nichts, wenn schon die Vorlage auf GitHub Arbeit aus einer Probe enthält.
+  let funde = (probe-merges "origin/main")
+  if ($funde | is-not-empty) {
+    print ""
+    print "Achtung: origin/main enthält Merges von Agenten-Branches. Die Vorlage auf GitHub ist nicht im Startzustand,"
+    print "auch dieser Klon ist es deshalb nicht:"
+    print $funde
+    print "Wahrscheinlich wurde der main einer Probe nach GitHub gepusht. Bereinigen: docs/GITHUB.md, Abschnitt 7."
+  }
 }

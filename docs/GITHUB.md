@@ -143,6 +143,9 @@ git push origin runde-1 runde-2 runde-3 runde-4 ende
 
 Eine Runde startet dann mit `nu scripts/runde.nu starten <n> --daten` von ihrem Startzustand. Ablauf, Grenzen und Warnungen im [[ARBEITSBLATT]], Abschnitt 9.1. Nach Runde 2 bis 4 steht der lokale `main` vor GitHub: nie pushen, sondern mit `zuruecksetzen.nu` zurück zur Vorlage.
 
+> [!warning] Den `main` einer Probe nie nach GitHub pushen
+> Nach einer Probe enthält der lokale `main` die Merges der Agenten. Ein `git push` überträgt sie ohne Rückfrage in die Vorlage, und jeder neue Klon beginnt dann mit dieser Arbeit statt mit dem Startzustand. Ergebnisse nur als Branch `probe/…` oder als Tags sichern. `einrichten.nu` und `zuruecksetzen.nu` warnen, wenn `origin/main` Merges von `claude/…` oder `opencode/…` enthält; dann Abschnitt 7.
+
 ## 6. Nach der Vorführung zurücksetzen
 
 1. In herdr alle Agenten beenden und die Workspaces der Worktrees schließen (`ctrl+b`, `shift+d`). Laufende `tauri dev` stoppen.
@@ -162,6 +165,70 @@ Das Skript zeigt zuerst, was es tun wird, und fragt nach:
 | `--daten` | Löscht `lernkarten.json` im App-Datenverzeichnis, damit die App wieder mit den Beispielstapeln startet |
 
 Danach ist der Klon im selben Zustand wie GitHub und bereit für die nächste Vorführung. Wer ein Ergebnis aufheben will, pusht es vorher nach Abschnitt 5. Tags lässt das Skript unverändert.
+
+Enthält schon `origin/main` Merges aus einer Probe, warnt das Skript am Ende: Dann ist auch der zurückgesetzte Klon nicht im Startzustand. Weiter mit Abschnitt 7.
+
+## 7. Probe versehentlich auf GitHub
+
+So sieht es aus: Ein frischer Klon enthält schon Arbeit aus den Runden, etwa `src/domain/csv.ts` oder Dateien unter `uebergaben/` neben der README, und `einrichten.nu` oder `zuruecksetzen.nu` melden „origin/main enthält Merges von Agenten-Branches“. Ursache ist fast immer ein `git push` aus dem `main` einer Probe. Am 16.11.2026 lagen so die Merges von `opencode/csv` und `claude/persistenz` aus Runde 1 auf GitHub.
+
+Bereinigt wird, indem `main` ohne die Merges der Probe neu aufgebaut und per Force-Push ersetzt wird. Die Pflege-Commits aus Pull Requests bleiben erhalten. Ein Revert per Pull Request reicht nicht: Die Merges blieben in der Geschichte von `main`, und `scripts/runde.nu markieren` würde sie bei jeder späteren Probe als Runde 1 mitzählen.
+
+1. Im Haupt-Checkout den Stand holen und die Merges der Probe ansehen:
+
+   ```nu
+   git switch main
+   git fetch origin
+   git log --first-parent --oneline origin/main
+   ```
+
+   Den letzten Commit vor dem ersten Merge der Probe notieren, hier `<sauber>`, und die Merges der Probe, hier `<merge-1>` und `<merge-2>`.
+
+2. Den Stand der Probe sichern, bevor er aus `main` verschwindet. `markieren` setzt `runde-1` auf `<sauber>` und die Tags der fertigen Runden auf die Merges:
+
+   ```nu
+   nu scripts/runde.nu markieren origin/main
+   git push origin runde-1 runde-2
+   ```
+
+3. Die Pflege-Commits ohne die Arbeit der Agenten auflisten. `^2` ist jeweils der Agenten-Branch eines Merges:
+
+   ```nu
+   git log --oneline --no-merges --reverse <sauber>..origin/main --not <merge-1>^2 <merge-2>^2
+   ```
+
+4. Eine bereinigte Linie aufbauen und die Commits aus Schritt 3 in dieser Reihenfolge übernehmen:
+
+   ```nu
+   git switch -c bereinigt <sauber>
+   git cherry-pick <commit-1> <commit-2> <commit-3>
+   ```
+
+5. Prüfen. Der erste Befehl zeigt nur Dateien der Probe, der zweite nichts, die Tests ergeben die Zahl des Startzustands:
+
+   ```nu
+   git diff --stat bereinigt origin/main
+   git diff --stat <sauber> bereinigt -- src src-tauri uebergaben package.json
+   npm run test
+   ```
+
+6. `main` auf GitHub ersetzen. `--force-with-lease` bricht ab, wenn `main` inzwischen weitergelaufen ist; `<alt>` ist der aktuelle Stand von `origin/main`:
+
+   ```nu
+   git push --force-with-lease=main:<alt> origin bereinigt:main
+   ```
+
+   Ist `main` auf GitHub geschützt, die Regel dafür kurz lockern.
+
+7. Jeden Klon zurücksetzen, auch auf einem zweiten Rechner. Die Warnung am Ende darf nicht mehr erscheinen:
+
+   ```nu
+   nu scripts/zuruecksetzen.nu --daten
+   git branch -D bereinigt
+   ```
+
+> [!tip] Vorbeugen
+> Auf GitHub für `main` eine Schutzregel anlegen, unter „Settings“, „Branches“ oder „Rules“: Änderungen nur über Pull Requests, Force-Push gesperrt. Dann scheitert ein versehentliches `git push` aus einer Probe. Die Bezeichnungen der GitHub-Oberfläche sind nicht geprüft (Stand 17.11.2026).
 
 ## Ihre bisherige Probe
 

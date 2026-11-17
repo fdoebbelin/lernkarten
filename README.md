@@ -61,6 +61,11 @@ seit dem 17.11.2026 einschließlich `runde-1` und `starten 1 --vorlage`:
 Markieren, auch aus dem Reflog, Versetzen mit `--erneuern`, Liste, Neustart der Runden 1 und 4
 samt `--daten` und die Fehlerfälle.
 
+`einrichten.nu` und `zuruecksetzen.nu` warnen, wenn `origin/main` Merges von `claude/…` oder
+`opencode/…` enthält, die Vorlage auf GitHub also Arbeit aus einer Probe trägt. Geprüft mit
+Nushell 0.101 unter Linux, mit einem nachgestellten Remote und am echten Verlauf vom 16.11.2026.
+Bereinigen: `docs/GITHUB.md`, Abschnitt 7.
+
 Nicht geprüft: der herdr-Zweig von `scripts/worktree.nu`, die Aufträge über `herdr agent prompt`,
 die Runden 2 bis 4, `scripts/zuruecksetzen.nu` und `scripts/runde.nu` unter Windows und die
 Rückfragen von `runde.nu` im Terminal. Die Modellwahl ist auf Claude
