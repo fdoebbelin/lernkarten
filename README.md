@@ -56,7 +56,12 @@ die Tests des Rust-Moduls `speicher.rs` (5 Tests) und alle Nushell-Skripte mit N
 und Git 2.43 unter Linux. In einer Probe unter Windows on ARM liefen Einrichtung, Tests,
 `npm run tauri dev` und Runde 1 bis zur Konfliktprüfung.
 
+`scripts/runde.nu` ist mit Nushell 0.101 unter Linux an einer nachgestellten Probe geprüft:
+Markieren, auch aus dem Reflog, Versetzen mit `--erneuern`, Liste, Neustart der Runden 1 und 4
+samt `--daten` und die Fehlerfälle.
+
 Nicht geprüft: der herdr-Zweig von `scripts/worktree.nu`, die Aufträge über `herdr agent prompt`,
-die Runden 2 bis 4 und `scripts/zuruecksetzen.nu` unter Windows. Die Modellwahl ist auf Claude
+die Runden 2 bis 4, `scripts/zuruecksetzen.nu` und `scripts/runde.nu` unter Windows und die
+Rückfragen von `runde.nu` im Terminal. Die Modellwahl ist auf Claude
 Code im Pro-Plan (`sonnet`, `haiku`) und auf die freien Modelle von OpenCode Zen ausgelegt
 (Stand 12.11.2026); die freien Modelle sind befristet, `opencode models` zeigt den aktuellen Bestand.
