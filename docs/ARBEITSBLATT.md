@@ -1,6 +1,6 @@
 ---
 title: Arbeitsblatt Lernkarten mit Claude Code und opencode in herdr
-date: 2026-11-12
+date: 2026-11-17
 tags: [herdr, claude-code, opencode, tauri, arbeitsblatt, vorführung]
 ---
 
@@ -58,6 +58,7 @@ Die Namen vergeben Sie mit `herdr agent rename`. Über sie schicken sich die Age
 | Worktree-Ablage ohne herdr | `../lernkarten.worktrees/<branch-slug>` |
 | Übergabedatei | `uebergaben/<branch mit - statt />.md` |
 | Konfliktprüfung | `nu scripts/konflikt-check.nu`, in herdr `ctrl+b`, `alt+k` |
+| Startzustände der Runden | Tags `runde-2`, `runde-3`, `runde-4`, `ende`; `nu scripts/runde.nu`, Abschnitt 9.1 |
 
 Der Startzustand zeigt zwei Beispielstapel mit der Zahl fälliger Karten. Gespeichert, gelernt und bearbeitet wird noch nicht; das entsteht in den Runden.
 
@@ -855,6 +856,9 @@ Die Reihenfolge der Dateien kann abweichen. Ob `speicher.rs` im Konflikt steht, 
 
 Lassen Sie den Leitstand die Ausgabe deuten: im Leitstand `/konfliktcheck`. Er empfiehlt eine Reihenfolge.
 
+> [!tip] In einer Probe: Konflikt festhalten
+> Vor dem Lösen beide Branches markieren, dann lässt sich der Konflikt später ohne die Agenten zeigen, Abschnitt 9.1: `git tag konflikt-notiz claude/notiz` und `git tag konflikt-schlagworte opencode/schlagworte`.
+
 ### 7.5 Konflikt lösen
 
 1. Den Branch von opencode zuerst zusammenführen, damit der Rebase bei Claude liegt:
@@ -973,7 +977,7 @@ Abnahme in der App: Die Statistik zeigt für die Beispieldaten die richtige Zahl
 ## 9. Abschluss
 
 1. Alle Agenten beenden, Workspaces der Worktrees schließen (`ctrl+b`, `shift+d`).
-2. Ergebnis aufheben, wenn gewünscht:
+2. Ergebnis aufheben, wenn gewünscht. Nach einer gelungenen Probe die Startzustände der Runden als Tags sichern, Abschnitt 9.1. Den ganzen Stand als Branch sichert:
 
    ```nu
    git push origin main:probe/2026-11-12
@@ -986,6 +990,79 @@ Abnahme in der App: Die Statistik zeigt für die Beispieldaten die richtige Zahl
    ```
 
    Das Skript zeigt, was es entfernt, und fragt nach. Danach entspricht der Klon wieder GitHub, und `lernkarten.json` ist gelöscht.
+
+### 9.1 Startzustände sichern und Runden einzeln wiederholen
+
+Jede Runde baut auf der vorigen auf: Runde 3 braucht die Ansichten aus Runde 2, Runde 4 die Felder aus Runde 3. Wer eine Runde noch einmal zeigen will, braucht deshalb den Stand von `main` an ihrem Anfang. Diese Stände entstehen nur in einer Probe, als letzter Merge der vorigen Runde. `scripts/runde.nu` hält sie als Tags fest und stellt sie wieder her.
+
+| Tag | Zeigt auf den letzten Merge von | Weiter im Arbeitsblatt bei |
+| --- | --- | --- |
+| keins, Stand von GitHub | – | Abschnitt 5, Runde 1 |
+| `runde-2` | `claude/persistenz`, `opencode/csv` | Abschnitt 6 |
+| `runde-3` | `opencode/sitzung`, `opencode/bearbeiten`, `claude/ansichten` | Abschnitt 7 |
+| `runde-4` | `claude/notiz`, `opencode/schlagworte` | Abschnitt 8 |
+| `ende` | `claude/statistik`, `opencode/statistik` | Abschnitt 9 |
+
+Runde 1 braucht kein Tag: Sie beginnt immer mit dem Stand von GitHub, also mit der aktuellen Vorlage.
+
+**Tags setzen**, nach der Probe und vor dem Zurücksetzen, im Haupt-Checkout:
+
+```nu
+nu scripts/runde.nu markieren
+```
+
+Das Skript sucht in `main` die Merges der Runden, zeigt die Zuordnung und fragt nach. Es erkennt die Merges an der Nachricht „Merge branch '…'“, die `git merge --no-ff --no-edit` schreibt. Ein vorgespulter Merge ohne `--no-ff` hinterlässt keinen Merge-Commit und wird nicht gefunden. Eine abgebrochene Probe ergibt nur die Tags der fertigen Runden.
+
+Ist der Klon schon zurückgesetzt, steht der alte Stand noch im Reflog, etwa 30 Tage lang:
+
+```nu
+git reflog main
+nu scripts/runde.nu markieren <hash>
+```
+
+Als `<hash>` den Eintrag vor „reset: moving to origin/main“ nehmen.
+
+**Tags auf GitHub sichern.** Das überträgt nur die Tags und die Commits, auf die sie zeigen; `main` auf GitHub bleibt im Startzustand:
+
+```nu
+git push origin runde-2 runde-3 runde-4 ende
+```
+
+Auf einem zweiten Rechner holt `git fetch origin --tags` sie ab. `nu scripts/runde.nu liste` zeigt, welche Tags vorhanden sind.
+
+**Eine Runde neu starten**, im Haupt-Checkout und mit beendeten Agenten:
+
+```nu
+nu scripts/runde.nu starten 3 --daten
+npm install
+```
+
+Das Skript holt die Tags von GitHub, ruft `scripts/zuruecksetzen.nu` auf und setzt `main` danach hart auf `runde-3`. Ab hier gilt das Arbeitsblatt unverändert, im Beispiel ab Abschnitt 7. `--daten` löscht `lernkarten.json`, damit die App mit den Beispielstapeln startet.
+
+> [!warning] `main` steht jetzt vor GitHub
+> Nach `starten` mit Runde 2 bis 4 enthält der lokale `main` Commits der Probe. `git push` würde sie ohne Rückfrage nach GitHub übertragen und die Vorlage überschreiben. Diesen Stand nie pushen. Zurück zur Vorlage mit `nu scripts/zuruecksetzen.nu`; die Tags bleiben dabei erhalten.
+
+> [!note] Ein Tag friert auch die Vorlage ein
+> Der Stand unter einem Tag enthält `AGENTS.md`, die Skills, die Skripte und dieses Arbeitsblatt in der Fassung der Probe. Ändert sich die Vorlage danach, zeigt `nu scripts/runde.nu liste` in der Spalte „enthält Vorlage“ ein „nein“. Dann die Probe wiederholen und mit `nu scripts/runde.nu markieren --erneuern` neu markieren; auf GitHub danach mit `git push --force origin <tags>`.
+
+**Den Konflikt aus Runde 3 ohne Agenten zeigen.** `claude/notiz` wird in 7.5 rebased, sein Stand vor dem Konflikt steht danach nicht mehr in `main`. Wer den Konflikt später ohne Wartezeit zeigen will, markiert in der Probe vor Schritt 7.5 beide Branches:
+
+```nu
+git tag konflikt-notiz claude/notiz
+git tag konflikt-schlagworte opencode/schlagworte
+git push origin konflikt-notiz konflikt-schlagworte
+```
+
+In einer späteren Vorführung nach `nu scripts/runde.nu starten 3` beide Branches daraus anlegen und mit 7.4 fortfahren:
+
+```nu
+git branch claude/notiz konflikt-notiz
+git branch opencode/schlagworte konflikt-schlagworte
+nu scripts/worktree.nu claude/notiz
+nu scripts/worktree.nu opencode/schlagworte
+```
+
+`worktree.nu` öffnet vorhandene Branches, ohne sie neu anzulegen. Im herdr-Zweig ist das nicht geprüft; legt herdr den Branch neu an, den Worktree mit `ctrl+b`, `shift+o` öffnen.
 
 ## 10. Auswertung
 
@@ -1027,3 +1104,6 @@ Fehler bei Installation und Einrichtung stehen in [[INSTALLATION]], Abschnitt 13
 | `git branch -d` meldet „not fully merged“ | Merge fehlt | Merge nachholen; `-D` nur, wenn der Branch verworfen werden soll |
 | opencode hängt minutenlang | Freies Modell ausgelastet | `Esc`, `ctrl+x`, `m`, Ausweichmodell |
 | Claude meldet das Sitzungs- oder Wochenlimit | Pro-Plan ausgeschöpft | Runde 4 als Muster: Übergabe, opencode übernimmt |
+| `runde.nu starten` meldet „Tag … fehlt“ | Keine Probe markiert oder Tags nicht auf GitHub | Abschnitt 9.1: markieren und Tags pushen |
+| `runde.nu markieren` meldet „nicht gefunden“ | Runde in der Probe nicht zusammengeführt oder ohne `--no-ff` | Merges mit `git log --first-parent --merges --oneline main` prüfen, Tag notfalls von Hand mit `git tag -a` setzen |
+| `gh repo sync` kann nicht vorspulen | `main` steht nach `runde.nu starten` auf einem Stand der Probe | `nu scripts/zuruecksetzen.nu` |

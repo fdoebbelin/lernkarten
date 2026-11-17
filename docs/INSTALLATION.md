@@ -1,6 +1,6 @@
 ---
 title: Installation der Software für das Projekt Lernkarten
-date: 2026-11-12
+date: 2026-11-17
 tags: [installation, herdr, claude-code, opencode, tauri, voraussetzungen]
 ---
 
@@ -56,7 +56,7 @@ Prüfen: `git --version` zeigt 2.38 oder höher.
 ## 2. Nushell
 
 > [!note] Bedeutung für das Projekt
-> Die vier Projektskripte sind in Nushell geschrieben: `einrichten.nu`, `worktree.nu`, `konflikt-check.nu` und `voraussetzungen.nu`. Die herdr-Beispielkonfiguration startet neue Panes ebenfalls in Nushell.
+> Die sechs Projektskripte sind in Nushell geschrieben: `einrichten.nu`, `worktree.nu`, `konflikt-check.nu`, `voraussetzungen.nu`, `zuruecksetzen.nu` und `runde.nu`. Die herdr-Beispielkonfiguration startet neue Panes ebenfalls in Nushell.
 
 | System | Befehl |
 | --- | --- |
