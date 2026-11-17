@@ -1,6 +1,7 @@
 # Beispielkonfiguration für herdr, abgestimmt auf dieses Projekt.
-# Nach ~/.config/herdr/config.toml übernehmen (Windows: %APPDATA%\herdr\config.toml),
-# danach: herdr server reload-config
+# Nach ~/.config/herdr/config.toml übernehmen, unter Windows nach
+# $env:APPDATA\herdr\config.toml (PowerShell) bzw. ($env.APPDATA | path join herdr config.toml) (Nushell),
+# danach: herdr server reload-config. Befehle: docs/ARBEITSBLATT.md, Abschnitt 3.2.
 # Stand: herdr 0.9.5
 
 onboarding = false

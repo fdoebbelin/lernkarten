@@ -43,7 +43,7 @@ Nach der Installation:
 
 1. `herdr` starten. Das Programm startet einen Hintergrundserver oder verbindet sich mit dem laufenden.
 2. Den Einrichtungsdialog durchlaufen. Er endet im Einstellungsreiter für Integrationen; dort `claude` und `opencode` installieren.
-3. Die Beispielkonfiguration dieses Projekts übernehmen: `herdr/config.beispiel.toml` nach `~/.config/herdr/config.toml` (Windows: `%APPDATA%\herdr\config.toml`).
+3. Die Beispielkonfiguration dieses Projekts übernehmen: `herdr/config.beispiel.toml` nach `~/.config/herdr/config.toml`, unter Windows als `config.toml` in den Ordner `herdr` unter `APPDATA` (PowerShell `$env:APPDATA`, Nushell `$env.APPDATA`). Befehle im [[ARBEITSBLATT]], Abschnitt 3.2.
 4. Nach jeder Änderung `herdr server reload-config` ausführen oder `ctrl+b`, dann `shift+r` drücken.
 
 ## Oberfläche einrichten
