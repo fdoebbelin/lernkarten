@@ -136,7 +136,7 @@ CachyOS:
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-Das Installationsprogramm legt `claude` nach `~/.local/bin`, unter Windows nach `%USERPROFILE%\.local\bin`. Steht dieser Ordner nicht im Pfad, meldet das Terminal danach, `claude` sei unbekannt. Dann den Ordner einmalig in den Pfad aufnehmen.
+Das Installationsprogramm legt `claude` nach `~/.local/bin`, unter Windows nach `.local\bin` im Benutzerordner (PowerShell `$env:USERPROFILE\.local\bin`, Nushell `~\.local\bin`). Steht dieser Ordner nicht im Pfad, meldet das Terminal danach, `claude` sei unbekannt. Dann den Ordner einmalig in den Pfad aufnehmen.
 
 Windows, in PowerShell, dauerhaft für Ihr Benutzerkonto:
 
@@ -224,7 +224,7 @@ herdr integration install claude
 herdr integration install opencode
 ```
 
-Danach `herdr/config.beispiel.toml` aus dem Projekt übernehmen: nach `~/.config/herdr/config.toml`, unter Windows nach `%APPDATA%\herdr\config.toml`.
+Danach `herdr/config.beispiel.toml` aus dem Projekt übernehmen: nach `~/.config/herdr/config.toml`, unter Windows als `config.toml` in den Ordner `herdr` unter `APPDATA` (PowerShell `$env:APPDATA`, Nushell `$env.APPDATA`). Befehle für beide Systeme im [[ARBEITSBLATT]], Abschnitt 3.2.
 
 Prüfen:
 
